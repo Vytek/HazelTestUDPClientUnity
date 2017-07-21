@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Net;
 using Hazel;
 using Hazel.Udp;
+using MessagePack;
 
 /// <summary>
 /// Network manager.
@@ -59,6 +60,10 @@ public class NetworkManager : MonoBehaviour {
 
 	void Start() {
 		Debug.Log("Network idle.");
+		StartClient (ipAddress);
+		Debug.Log("Network Started.");
+		serverConn.SendBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, SendOption.Reliable);
+		Debug.Log("Network Trasmitted.");
 	}
 
 	void OnDestroy() {
