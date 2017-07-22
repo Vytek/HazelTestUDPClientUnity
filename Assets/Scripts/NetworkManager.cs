@@ -15,6 +15,8 @@ public class NetworkManager : MonoBehaviour {
 	public int portNumber = 4296;
 	public string ipAddress = "127.0.0.1";
 
+    public GameObject CubeOne;
+
 	private static NetworkManager _instance = null;
 
 	// Client Data
