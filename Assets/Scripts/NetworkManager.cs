@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine.Events;
 using UnityEngine;
 using System.Net;
@@ -99,12 +100,48 @@ public class NetworkManager : MonoBehaviour {
     #endregion
 
     #region NetworkLogic
-    public void SendMessage(int Type, int IDObject) {
+    /// <summary>
+    /// SendMessage
+    /// </summary>
+    /// <param name="Type"></param>
+    /// <param name="IDObject"></param>
+    /// <param name="Pos"></param>
+    /// <param name="Rot"></param>
+    public void SendMessage(int Type, int IDObject, Vec3 Pos, Vec4 Rot) {
         // Create flatbuffer class
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
 
         HazelTest.Object.StartObject(fbb);
+        HazelTest.Object.AddID(fbb, IDObject);
+        HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.X, Pos.Y, Pos.Z));
+        HazelTest.Object.AddRot(fbb, Vec4.CreateVec4(fbb, Rot.X, Rot.Y, Rot.Z, Rot.W));
+        var offset = HazelTest.Object.EndObject(fbb);
 
+        HazelTest.Object.FinishObjectBuffer(fbb, offset);
+        //CubeOne.transform.position
+
+        using (var ms = new MemoryStream(fbb.DataBuffer.Data, fbb.DataBuffer.Position, fbb.Offset))
+        {
+            serverConn.SendBytes(ms.ToArray(), SendOption.Reliable);
+            Debug.Log("Message sent!");
+        }
+    }
+
+    public void RecieveMessage(byte[] BufferReciever)
+    {
+        ByteBuffer bb = new ByteBuffer(BufferReciever);
+
+        /*
+        if (!HazelTest.Object.))
+        {
+            throw new Exception("Identifier test failed, you sure the identifier is identical to the generated schema's one?");
+        }
+        */
+
+        HazelTest.Object ObjectRecieved = HazelTest.Object.GetRootAsObject(bb);
+
+        Debug.Log("LOADED DATA : ");
+        Debug.Log("POS : " + ObjectRecieved.Pos.X + ", " + ObjectRecieved.Pos.Y + ", " + ObjectRecieved.Pos.Z);
     }
     #endregion
 }
