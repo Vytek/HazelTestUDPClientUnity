@@ -6,6 +6,8 @@ using System.Net;
 using Hazel;
 using Hazel.Udp;
 using MessagePack;
+using FlatBuffers;
+using HazelTest;
 
 /// <summary>
 /// Network manager.
@@ -94,5 +96,15 @@ public class NetworkManager : MonoBehaviour {
 		serverConn = null;
 		args.Recycle();
 	}
-	#endregion
+    #endregion
+
+    #region NetworkLogic
+    public void SendMessage(int Type, int IDObject) {
+        // Create flatbuffer class
+        FlatBufferBuilder fbb = new FlatBufferBuilder(1);
+
+        HazelTest.Object.StartObject(fbb);
+
+    }
+    #endregion
 }
