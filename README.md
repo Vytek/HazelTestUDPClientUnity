@@ -1,7 +1,7 @@
 # HazelTestUDPClientUnity
 Unity Test Client Hazel UDP 
 
-This is a Networking Demo:
+This is a Networking Demo based on:
 
 - https://github.com/DarkRiftNetworking/Hazel-Networking
 - https://github.com/Vytek/HazelTest
