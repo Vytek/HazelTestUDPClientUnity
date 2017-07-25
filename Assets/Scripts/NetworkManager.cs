@@ -87,7 +87,8 @@ public class NetworkManager : MonoBehaviour {
 	void HandleDataFromServer(object sender, DataReceivedEventArgs args) {
 		Connection connection = (Connection)sender;
 		Debug.Log("Received " + args.Bytes.Length + " bytes from server at " + connection.EndPoint.ToString());
-		//connection.SendBytes(args.Bytes, args.SendOption);      
+        //connection.SendBytes(args.Bytes, args.SendOption);
+        ReceiveMessage(args.Bytes);
 		args.Recycle();
 	}
 
@@ -107,14 +108,16 @@ public class NetworkManager : MonoBehaviour {
     /// <param name="IDObject"></param>
     /// <param name="Pos"></param>
     /// <param name="Rot"></param>
-    public void SendMessage(int Type, int IDObject, Vec3 Pos, Vec4 Rot) {
+    public void SendMessage(int Type, int IDObject, Vector3 Pos, Quaternion Rot) {
         // Create flatbuffer class
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
 
         HazelTest.Object.StartObject(fbb);
         HazelTest.Object.AddID(fbb, IDObject);
-        HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.X, Pos.Y, Pos.Z));
-        HazelTest.Object.AddRot(fbb, Vec4.CreateVec4(fbb, Rot.X, Rot.Y, Rot.Z, Rot.W));
+        Debug.Log("ID SENDED: " + IDObject);
+        HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.x, Pos.y, Pos.z));
+        Debug.Log("POS SENDED: " + Pos.x.ToString() + ", " + Pos.y.ToString() + ", " + Pos.z.ToString());
+        HazelTest.Object.AddRot(fbb, Vec4.CreateVec4(fbb, Rot.x, Rot.y, Rot.z, Rot.w));
         var offset = HazelTest.Object.EndObject(fbb);
 
         HazelTest.Object.FinishObjectBuffer(fbb, offset);
@@ -127,9 +130,9 @@ public class NetworkManager : MonoBehaviour {
         }
     }
 
-    public void RecieveMessage(byte[] BufferReciever)
+    public void ReceiveMessage(byte[] BufferReceiver)
     {
-        ByteBuffer bb = new ByteBuffer(BufferReciever);
+        ByteBuffer bb = new ByteBuffer(BufferReceiver);
 
         /*
         if (!HazelTest.Object.))
@@ -138,10 +141,12 @@ public class NetworkManager : MonoBehaviour {
         }
         */
 
-        HazelTest.Object ObjectRecieved = HazelTest.Object.GetRootAsObject(bb);
+        //Please see: https://stackoverflow.com/questions/748062/how-can-i-return-multiple-values-from-a-function-in-c
+        HazelTest.Object ObjectReceived = HazelTest.Object.GetRootAsObject(bb);
 
-        Debug.Log("LOADED DATA : ");
-        Debug.Log("POS : " + ObjectRecieved.Pos.X + ", " + ObjectRecieved.Pos.Y + ", " + ObjectRecieved.Pos.Z);
+        Debug.Log("RECEIVED DATA : ");
+        Debug.Log("IDObject RECEIVED : " + ObjectReceived.ID);
+        Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
     }
     #endregion
 }
