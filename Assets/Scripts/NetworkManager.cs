@@ -158,11 +158,11 @@ public class NetworkManager : MonoBehaviour {
         Debug.Log("IDObject RECEIVED : " + ObjectReceived.ID);
         Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
 
-		ReceiveMessageFromGameObject ReceiveMessageFromGameObjectBuffer;
+		var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
 		ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
 
-		if(OnHealthUpdated != null)
-			OnHealthUpdated(health);
+		if(OnReceiveMessageFromGameObjectUpdate != null)
+			OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
 
     }
     #endregion
