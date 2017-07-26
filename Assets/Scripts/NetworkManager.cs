@@ -118,7 +118,7 @@ public class NetworkManager : MonoBehaviour {
     /// <param name="IDObject"></param>
     /// <param name="Pos"></param>
     /// <param name="Rot"></param>
-    public void SendMessage(int Type, int IDObject, Vector3 Pos, Quaternion Rot) {
+    public void SendMessage(byte Type, int IDObject, Vector3 Pos, Quaternion Rot) {
         // Create flatbuffer class
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
 
@@ -135,6 +135,8 @@ public class NetworkManager : MonoBehaviour {
 
         using (var ms = new MemoryStream(fbb.DataBuffer.Data, fbb.DataBuffer.Position, fbb.Offset))
         {
+            //Add type?
+            //https://stackoverflow.com/questions/5591329/c-sharp-how-to-add-byte-to-byte-array
             serverConn.SendBytes(ms.ToArray(), SendOption.Reliable);
             Debug.Log("Message sent!");
         }
@@ -142,6 +144,8 @@ public class NetworkManager : MonoBehaviour {
 
     public void ReceiveMessage(byte[] BufferReceiver)
     {
+        //Remove first byte (type)
+        //https://stackoverflow.com/questions/31550484/faster-code-to-remove-first-elements-from-byte-array
         ByteBuffer bb = new ByteBuffer(BufferReceiver);
 
         /*
