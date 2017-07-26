@@ -19,14 +19,8 @@ public class NetworkCube : MonoBehaviour {
 
     void NetworkManager_OnReceiveMessageFromGameObjectUpdate (NetworkManager.ReceiveMessageFromGameObject newMessage)
     {
-
-		newMessage.
-
-		///Come cavolo faccio ad ottenete ID, Pos e Rot ricevuti??
-
-		//NetworkManager.ReceiveMessageFromGameObject MessageBuffer = (NetworkManager.ReceiveMessageFromGameObject)newMessage;
-
-		Debug.Log(MessageBuffer.
+		Debug.Log ("Raise event in GameObject");
+		Debug.Log (newMessage.GameObjectID);
     }
 	
 	// Update is called once per frame

@@ -20,7 +20,7 @@ public class NetworkManager : MonoBehaviour {
 
     public GameObject CubeOne;
 
-	struct ReceiveMessageFromGameObject {
+	public struct ReceiveMessageFromGameObject {
 		public int GameObjectID;
 		public Vector3 GameObjectPos;
 		public Quaternion GameObjectRot;
