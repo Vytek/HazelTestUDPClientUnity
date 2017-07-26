@@ -124,9 +124,9 @@ public class NetworkManager : MonoBehaviour {
 
         HazelTest.Object.StartObject(fbb);
         HazelTest.Object.AddID(fbb, IDObject);
-        Debug.Log("ID SENDED: " + IDObject);
+        Debug.Log("ID SENT: " + IDObject);
         HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.x, Pos.y, Pos.z));
-        Debug.Log("POS SENDED: " + Pos.x.ToString() + ", " + Pos.y.ToString() + ", " + Pos.z.ToString());
+        Debug.Log("POS SENT: " + Pos.x.ToString() + ", " + Pos.y.ToString() + ", " + Pos.z.ToString());
         HazelTest.Object.AddRot(fbb, Vec4.CreateVec4(fbb, Rot.x, Rot.y, Rot.z, Rot.w));
         var offset = HazelTest.Object.EndObject(fbb);
 
@@ -160,8 +160,10 @@ public class NetworkManager : MonoBehaviour {
 
 		var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
 		ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
+        ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
+        ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Y, ObjectReceived.Rot.W);
 
-		if(OnReceiveMessageFromGameObjectUpdate != null)
+        if (OnReceiveMessageFromGameObjectUpdate != null)
 			OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
 
     }

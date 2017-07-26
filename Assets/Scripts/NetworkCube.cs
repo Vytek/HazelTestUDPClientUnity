@@ -8,8 +8,8 @@ public class NetworkCube : MonoBehaviour {
     public ushort objectID;
     public bool DEBUG = true;
 
-    Vector3 lastPosition;
-    Quaternion lastRotation;
+    Vector3 lastPosition = Vector3.zero;
+    Quaternion lastRotation = Quaternion.identity;
     Vector3 lastScale;
 
     // Use this for initialization
@@ -21,11 +21,13 @@ public class NetworkCube : MonoBehaviour {
     {
 		Debug.Log ("Raise event in GameObject");
 		Debug.Log (newMessage.GameObjectID);
+        Debug.Log (newMessage.GameObjectPos);
+        Debug.Log (newMessage.GameObjectRot);
     }
 	
 	// Update is called once per frame
 	void Update () {
-        if ((Vector3.Distance(lastPosition, transform.position) > 0.05f) || (transform.rotation != lastRotation))
+        if ((Vector3.Distance(transform.position, lastPosition) > 0.05) || (Quaternion.Angle(transform.rotation, lastRotation) > 0.3))
         {
             NetworkManager.instance.SendMessage(0, 1, transform.position, transform.rotation);
         }
