@@ -20,7 +20,17 @@ public class NetworkManager : MonoBehaviour {
 
     public GameObject CubeOne;
 
+	struct ReceiveMessageFromGameObject {
+		public int GameObjectID;
+		public Vector3 GameObjectPos;
+		public Quaternion GameObjectRot;
+	};
+
 	private static NetworkManager _instance = null;
+
+	//Events
+	public delegate void ReceiveMessageUpdate(ReceiveMessageFromGameObject newMessage);
+	public static event ReceiveMessageUpdate OnReceiveMessageFromGameObjectUpdate;
 
 	// Client Data
 	Connection serverConn;
@@ -147,6 +157,13 @@ public class NetworkManager : MonoBehaviour {
         Debug.Log("RECEIVED DATA : ");
         Debug.Log("IDObject RECEIVED : " + ObjectReceived.ID);
         Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
+
+		ReceiveMessageFromGameObject ReceiveMessageFromGameObjectBuffer;
+		ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
+
+		if(OnHealthUpdated != null)
+			OnHealthUpdated(health);
+
     }
     #endregion
 }

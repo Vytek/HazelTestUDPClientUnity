@@ -14,8 +14,20 @@ public class NetworkCube : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-		
+		NetworkManager.OnReceiveMessageFromGameObjectUpdate += NetworkManager_OnReceiveMessageFromGameObjectUpdate;
 	}
+
+    void NetworkManager_OnReceiveMessageFromGameObjectUpdate (NetworkManager.ReceiveMessageFromGameObject newMessage)
+    {
+
+		newMessage.
+
+		///Come cavolo faccio ad ottenete ID, Pos e Rot ricevuti??
+
+		//NetworkManager.ReceiveMessageFromGameObject MessageBuffer = (NetworkManager.ReceiveMessageFromGameObject)newMessage;
+
+		Debug.Log(MessageBuffer.
+    }
 	
 	// Update is called once per frame
 	void Update () {
