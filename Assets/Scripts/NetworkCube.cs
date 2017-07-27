@@ -20,6 +20,7 @@ public class NetworkCube : MonoBehaviour {
     void NetworkManager_OnReceiveMessageFromGameObjectUpdate (NetworkManager.ReceiveMessageFromGameObject newMessage)
     {
 		Debug.Log ("Raise event in GameObject");
+        Debug.Log (newMessage.MessageType);
 		Debug.Log (newMessage.GameObjectID);
         Debug.Log (newMessage.GameObjectPos);
         Debug.Log (newMessage.GameObjectRot);
@@ -29,7 +30,7 @@ public class NetworkCube : MonoBehaviour {
 	void Update () {
         if ((Vector3.Distance(transform.position, lastPosition) > 0.05) || (Quaternion.Angle(transform.rotation, lastRotation) > 0.3))
         {
-            NetworkManager.instance.SendMessage(0, 1, transform.position, transform.rotation);
+            NetworkManager.instance.SendMessage(NetworkManager.PacketId.OBJECT_MOVE, 1, transform.position, transform.rotation);
         }
         //Update stuff
         lastPosition = transform.position;
