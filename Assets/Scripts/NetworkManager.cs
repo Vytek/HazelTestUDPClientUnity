@@ -18,7 +18,7 @@ public class NetworkManager : MonoBehaviour {
 	public int portNumber = 4296;
 	public string ipAddress = "127.0.0.1";
 
-    public GameObject CubeOne;
+  public GameObject CubeOne;
 
 	public struct ReceiveMessageFromGameObject {
 		public int GameObjectID;
@@ -31,6 +31,11 @@ public class NetworkManager : MonoBehaviour {
 	//Events
 	public delegate void ReceiveMessageUpdate(ReceiveMessageFromGameObject newMessage);
 	public static event ReceiveMessageUpdate OnReceiveMessageFromGameObjectUpdate;
+
+	public enum PacketId {
+		PLAYER_JOIN = 0,
+		OBJECT_MOVE = 1
+	}
 
 	// Client Data
 	Connection serverConn;
@@ -142,34 +147,33 @@ public class NetworkManager : MonoBehaviour {
         }
     }
 
-    public void ReceiveMessage(byte[] BufferReceiver)
+    private void ReceiveMessage(byte[] BufferReceiver)
     {
-        //Remove first byte (type)
-        //https://stackoverflow.com/questions/31550484/faster-code-to-remove-first-elements-from-byte-array
-        ByteBuffer bb = new ByteBuffer(BufferReceiver);
+      //Remove first byte (type)
+      //https://stackoverflow.com/questions/31550484/faster-code-to-remove-first-elements-from-byte-array
+      ByteBuffer bb = new ByteBuffer(BufferReceiver);
 
-        /*
-        if (!HazelTest.Object.))
-        {
-            throw new Exception("Identifier test failed, you sure the identifier is identical to the generated schema's one?");
-        }
-        */
+      /*
+      if (!HazelTest.Object.))
+      {
+          throw new Exception("Identifier test failed, you sure the identifier is identical to the generated schema's one?");
+      }
+      */
 
-        //Please see: https://stackoverflow.com/questions/748062/how-can-i-return-multiple-values-from-a-function-in-c
-        HazelTest.Object ObjectReceived = HazelTest.Object.GetRootAsObject(bb);
+      //Please see: https://stackoverflow.com/questions/748062/how-can-i-return-multiple-values-from-a-function-in-c
+      HazelTest.Object ObjectReceived = HazelTest.Object.GetRootAsObject(bb);
 
-        Debug.Log("RECEIVED DATA : ");
-        Debug.Log("IDObject RECEIVED : " + ObjectReceived.ID);
-        Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
+      Debug.Log("RECEIVED DATA : ");
+      Debug.Log("IDObject RECEIVED : " + ObjectReceived.ID);
+      Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
 
-		var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
-		ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
-        ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
-        ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Y, ObjectReceived.Rot.W);
+			var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
+			ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
+      ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
+      ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Y, ObjectReceived.Rot.W);
 
         if (OnReceiveMessageFromGameObjectUpdate != null)
-			OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
-
+					OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
     }
     #endregion
 }
