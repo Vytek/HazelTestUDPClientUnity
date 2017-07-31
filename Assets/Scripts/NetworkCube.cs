@@ -9,6 +9,7 @@ public class NetworkCube : MonoBehaviour {
     public bool DEBUG = true;
 
     Vector3 lastPosition = Vector3.zero;
+    Vector3 nextPosition = Vector3.zero;
     Quaternion lastRotation = Quaternion.identity;
     Vector3 lastScale;
 
@@ -17,6 +18,14 @@ public class NetworkCube : MonoBehaviour {
 		NetworkManager.OnReceiveMessageFromGameObjectUpdate += NetworkManager_OnReceiveMessageFromGameObjectUpdate;
 	}
 
+    public IEnumerator ThisWillBeExecutedOnTheMainThread()
+    {
+        Debug.Log("This is executed from the main thread");
+        //transform.position = new Vector3(newMessage.GameObjectPos.x, newMessage.GameObjectPos.y, newMessage.GameObjectPos.z);
+        transform.position = nextPosition;
+        yield return null;
+    }
+
     void NetworkManager_OnReceiveMessageFromGameObjectUpdate (NetworkManager.ReceiveMessageFromGameObject newMessage)
     {
 		Debug.Log ("Raise event in GameObject");
@@ -24,6 +33,13 @@ public class NetworkCube : MonoBehaviour {
 		Debug.Log (newMessage.GameObjectID);
         Debug.Log (newMessage.GameObjectPos);
         Debug.Log (newMessage.GameObjectRot);
+
+        //Update pos and rot
+        if (newMessage.GameObjectID == objectID)
+        {
+            nextPosition = new Vector3(newMessage.GameObjectPos.x, newMessage.GameObjectPos.y, newMessage.GameObjectPos.z);
+            UnityMainThreadDispatcher.Instance().Enqueue(ThisWillBeExecutedOnTheMainThread());
+        }
     }
 	
 	// Update is called once per frame

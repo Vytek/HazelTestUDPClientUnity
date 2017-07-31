@@ -140,6 +140,7 @@ public class NetworkManager : MonoBehaviour {
                 TypeBuffer = 1;
                 break;
         }
+        Debug.Log("TYPE SENT: " + TypeBuffer);
 
         // Create flatbuffer class
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
@@ -163,6 +164,8 @@ public class NetworkManager : MonoBehaviour {
             ms.ToArray().CopyTo(newArray, 1);
             newArray[0] = TypeBuffer;
             serverConn.SendBytes(newArray, SendOption.Reliable);
+            Debug.Log(newArray);
+            Debug.Log(ms.ToArray());
             Debug.Log("Message sent!");
         }
     }
@@ -171,10 +174,11 @@ public class NetworkManager : MonoBehaviour {
     {
         //Remove first byte (type)
         //https://stackoverflow.com/questions/31550484/faster-code-to-remove-first-elements-from-byte-array
+        Debug.Log(BufferReceiver);
         byte TypeBuffer = BufferReceiver[0];
         byte[] NewBufferReceiver = new byte[BufferReceiver.Length - 1];
         Array.Copy(BufferReceiver, 1, NewBufferReceiver, 0, NewBufferReceiver.Length);
-        ByteBuffer bb = new ByteBuffer(BufferReceiver);
+        ByteBuffer bb = new ByteBuffer(NewBufferReceiver);
 
         /*
         if (!HazelTest.Object.))
