@@ -11,3 +11,4 @@ Projects used:
 - https://google.github.io/flatbuffers/
 - https://github.com/neuecc/MessagePack-CSharp
 - https://github.com/CaptainHillman/UnityTools
+- https://github.com/PimDeWitte/UnityMainThreadDispatcher
