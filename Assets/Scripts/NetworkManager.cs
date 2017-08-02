@@ -91,11 +91,12 @@ public class NetworkManager : MonoBehaviour {
 			Destroy(gameObject);
 		}
 	}
-
+		
 	/// <summary>
 	/// Start this instance.
 	/// </summary>
 	void Start() {
+		CustomLogger.LogIt ("--- Starting Logging ---");
 		Debug.Log("Network idle.");
 		StartClient (ipAddress);
 		Debug.Log("Network Started.");
@@ -182,8 +183,6 @@ public class NetworkManager : MonoBehaviour {
             ms.ToArray().CopyTo(newArray, 1);
             newArray[0] = TypeBuffer;
             serverConn.SendBytes(newArray, SendOption.Reliable);
-            Debug.Log(newArray);
-            Debug.Log(ms.ToArray());
             Debug.Log("Message sent!");
         }
     }
@@ -196,7 +195,6 @@ public class NetworkManager : MonoBehaviour {
     {
         //Remove first byte (type)
         //https://stackoverflow.com/questions/31550484/faster-code-to-remove-first-elements-from-byte-array
-        Debug.Log(BufferReceiver);
         byte TypeBuffer = BufferReceiver[0];
         byte[] NewBufferReceiver = new byte[BufferReceiver.Length - 1];
         Array.Copy(BufferReceiver, 1, NewBufferReceiver, 0, NewBufferReceiver.Length);

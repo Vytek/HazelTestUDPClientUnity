@@ -11,6 +11,7 @@ public class NetworkCube : MonoBehaviour {
     Vector3 lastPosition = Vector3.zero;
     Vector3 nextPosition = Vector3.zero;
     Quaternion lastRotation = Quaternion.identity;
+	Quaternion nextRotation = Quaternion.identity;
     Vector3 lastScale;
 
     // Use this for initialization
@@ -23,6 +24,7 @@ public class NetworkCube : MonoBehaviour {
         Debug.Log("This is executed from the main thread");
         //transform.position = new Vector3(newMessage.GameObjectPos.x, newMessage.GameObjectPos.y, newMessage.GameObjectPos.z);
         transform.position = nextPosition;
+		//Add rotation
         yield return null;
     }
 

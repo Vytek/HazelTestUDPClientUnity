@@ -12,3 +12,5 @@ Projects used:
 - https://github.com/neuecc/MessagePack-CSharp
 - https://github.com/CaptainHillman/UnityTools
 - https://github.com/PimDeWitte/UnityMainThreadDispatcher
+- https://github.com/Deadcows/CustomLogger
+- ScreenLogger Unity Assets: https://www.assetstore.unity3d.com/en/#!/content/49114
