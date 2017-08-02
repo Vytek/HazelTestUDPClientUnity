@@ -34,6 +34,18 @@ public class NetworkManager : MonoBehaviour {
 	public delegate void ReceiveMessageUpdate(ReceiveMessageFromGameObject newMessage);
 	public static event ReceiveMessageUpdate OnReceiveMessageFromGameObjectUpdate;
 
+	/// <summary>
+	/// Send type.
+	/// </summary>
+	public enum SendType {
+		SENDTOALL = 0,
+		SENDTOOTHER = 1,
+		SENDTOSERVER = 2
+	}
+
+	/// <summary>
+	/// Packet identifier.
+	/// </summary>
 	public enum PacketId {
 		PLAYER_JOIN = 0,
 		OBJECT_MOVE = 1
@@ -80,6 +92,9 @@ public class NetworkManager : MonoBehaviour {
 		}
 	}
 
+	/// <summary>
+	/// Start this instance.
+	/// </summary>
 	void Start() {
 		Debug.Log("Network idle.");
 		StartClient (ipAddress);
@@ -88,6 +103,9 @@ public class NetworkManager : MonoBehaviour {
 		Debug.Log("Network Trasmitted.");
 	}
 
+	/// <summary>
+	/// Raises the destroy event.
+	/// </summary>
 	void OnDestroy() {
 		if (serverConn != null) serverConn.Close();
 	}
@@ -170,6 +188,10 @@ public class NetworkManager : MonoBehaviour {
         }
     }
 
+	/// <summary>
+	/// Receives the message.
+	/// </summary>
+	/// <param name="BufferReceiver">Buffer receiver.</param>
     private void ReceiveMessage(byte[] BufferReceiver)
     {
         //Remove first byte (type)
@@ -204,4 +226,39 @@ public class NetworkManager : MonoBehaviour {
 			        OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
     }
     #endregion
+
+	#region Utility
+	//https://stackoverflow.com/questions/29693870/conversion-between-vector3-coordinates-and-string
+	public static string Vector3ToString(Vector3 v){ // change 0.00 to 0.0000 or any other precision you desire, i am saving space by using only 2 digits
+		return string.Format("{0:0.00},{1:0.00},{2:0.00}", v.x, v.y, v.z);
+	}
+
+	public static Vector3 Vector3FromString(String s){
+		string[] parts = s.Split(new string[] { "," }, StringSplitOptions.None);
+		return new Vector3(
+			float.Parse(parts[0]),
+			float.Parse(parts[1]),
+			float.Parse(parts[2]));
+	}
+
+	//http://answers.unity3d.com/questions/1134997/string-to-vector3.html
+	public static Vector3 StringToVector3(string sVector)
+	{
+		// Remove the parentheses
+		if (sVector.StartsWith ("(") && sVector.EndsWith (")")) {
+			sVector = sVector.Substring(1, sVector.Length-2);
+		}
+
+		// split the items
+		string[] sArray = sVector.Split(',');
+
+		// store as a Vector3
+		Vector3 result = new Vector3(
+			float.Parse(sArray[0]),
+			float.Parse(sArray[1]),
+			float.Parse(sArray[2]));
+
+		return result;
+	}
+	#endregion
 }
