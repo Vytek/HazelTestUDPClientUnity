@@ -17,12 +17,16 @@ public class NetworkCube : MonoBehaviour {
     // Use this for initialization
     void Start () {
 		NetworkManager.OnReceiveMessageFromGameObjectUpdate += NetworkManager_OnReceiveMessageFromGameObjectUpdate;
+		//Initialize
+		lastPosition = transform.position;
+		lastRotation = transform.rotation;
 	}
 
     public IEnumerator ThisWillBeExecutedOnTheMainThread()
     {
         Debug.Log("This is executed from the main thread");
         //transform.position = new Vector3(newMessage.GameObjectPos.x, newMessage.GameObjectPos.y, newMessage.GameObjectPos.z);
+		lastPosition = nextPosition;
         transform.position = nextPosition;
 		//Add rotation
         yield return null;
@@ -48,10 +52,10 @@ public class NetworkCube : MonoBehaviour {
 	void Update () {
         if ((Vector3.Distance(transform.position, lastPosition) > 0.05) || (Quaternion.Angle(transform.rotation, lastRotation) > 0.3))
         {
-            NetworkManager.instance.SendMessage(NetworkManager.PacketId.OBJECT_MOVE, 1, transform.position, transform.rotation);
+			NetworkManager.instance.SendMessage(NetworkManager.PacketId.OBJECT_MOVE, this.objectID, transform.position, transform.rotation);
+			//Update stuff
+			lastPosition = transform.position;
+			lastRotation = transform.rotation;
         }
-        //Update stuff
-        lastPosition = transform.position;
-        lastRotation = transform.rotation;
     }
 }
