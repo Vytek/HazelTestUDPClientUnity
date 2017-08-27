@@ -22,7 +22,7 @@ public class NetworkManager : MonoBehaviour {
   public GameObject CubeOne;
 
 	public struct ReceiveMessageFromGameObject {
-        public byte MessageType;
+        public sbyte MessageType;
         public int GameObjectID;
 		public Vector3 GameObjectPos;
 		public Quaternion GameObjectRot;
@@ -46,7 +46,7 @@ public class NetworkManager : MonoBehaviour {
 	/// <summary>
 	/// Packet identifier.
 	/// </summary>
-	public enum PacketId {
+	public enum PacketId: sbyte {
 		PLAYER_JOIN = 0,
 		OBJECT_MOVE = 1
 	}
@@ -144,9 +144,29 @@ public class NetworkManager : MonoBehaviour {
     /// <param name="IDObject"></param>
     /// <param name="Pos"></param>
     /// <param name="Rot"></param>
-    public void SendMessage(PacketId Type, int IDObject, Vector3 Pos, Quaternion Rot) {
-        byte TypeBuffer = 0;
-        //Choose type message
+    public void SendMessage(SendType SType, PacketId Type, int IDObject, Vector3 Pos, Quaternion Rot) {
+        sbyte TypeBuffer = 0;
+        byte STypeBuffer = 0;
+
+        //Choose who to send message
+        switch (SType)
+        {
+            case SendType.SENDTOALL:
+                STypeBuffer = 0;
+                break;
+            case SendType.SENDTOOTHER:
+                STypeBuffer = 1;
+                break;
+            case SendType.SENDTOSERVER:
+                STypeBuffer = 2;
+                break;
+            default:
+                STypeBuffer = 0;
+                break;
+        }
+        Debug.Log("SENDTYPE SENT: " + STypeBuffer);
+
+        //Choose type message (TO Modify)
         switch (Type)
         {
             case PacketId.PLAYER_JOIN:
@@ -165,6 +185,7 @@ public class NetworkManager : MonoBehaviour {
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
 
         HazelTest.Object.StartObject(fbb);
+        HazelTest.Object.AddType(fbb, TypeBuffer);
         HazelTest.Object.AddID(fbb, IDObject);
         Debug.Log("ID SENT: " + IDObject);
         HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.x, Pos.y, Pos.z));
@@ -181,7 +202,7 @@ public class NetworkManager : MonoBehaviour {
             //https://stackoverflow.com/questions/5591329/c-sharp-how-to-add-byte-to-byte-array
             byte[] newArray = new byte[ms.ToArray().Length + 1];
             ms.ToArray().CopyTo(newArray, 1);
-            newArray[0] = TypeBuffer;
+            newArray[0] = STypeBuffer;
             serverConn.SendBytes(newArray, SendOption.Reliable);
             Debug.Log("Message sent!");
         }
@@ -195,7 +216,7 @@ public class NetworkManager : MonoBehaviour {
     {
         //Remove first byte (type)
         //https://stackoverflow.com/questions/31550484/faster-code-to-remove-first-elements-from-byte-array
-        byte TypeBuffer = BufferReceiver[0];
+        byte STypeBuffer = BufferReceiver[0]; //This is NOT TypeBuffer ;-)
         byte[] NewBufferReceiver = new byte[BufferReceiver.Length - 1];
         Array.Copy(BufferReceiver, 1, NewBufferReceiver, 0, NewBufferReceiver.Length);
         ByteBuffer bb = new ByteBuffer(NewBufferReceiver);
@@ -215,13 +236,24 @@ public class NetworkManager : MonoBehaviour {
         Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
 
         var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
-        ReceiveMessageFromGameObjectBuffer.MessageType = TypeBuffer;
-        ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
-        ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
-        ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Y, ObjectReceived.Rot.W);
+        sbyte TypeBuffer = ObjectReceived.Type;
 
-        if (OnReceiveMessageFromGameObjectUpdate != null)
-			        OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
+        if (PacketId.PLAYER_JOIN.Equals(TypeBuffer))
+        {
+            //Code for new Player
+            //Spawn something?
+            //Using Dispatcher?
+            Debug.Log("New Player!");
+        } else if (PacketId.OBJECT_MOVE.Equals(TypeBuffer))
+        {
+            ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
+            ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
+            ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
+            ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Y, ObjectReceived.Rot.W);
+
+            if (OnReceiveMessageFromGameObjectUpdate != null)
+                OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
+        } 
     }
     #endregion
 

@@ -5,13 +5,6 @@ namespace HazelTest
 
 using FlatBuffers;
 
-public enum Color : sbyte
-{
- Red = 1,
- Green = 2,
- Blue = 3,
-};
-
 public sealed class Vec3 : Struct {
   public Vec3 __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
@@ -51,16 +44,18 @@ public sealed class Object : Table {
   public static Object GetRootAsObject(ByteBuffer _bb, Object obj) { return (obj.__init(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public Object __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
-  public int ID { get { int o = __offset(4); return o != 0 ? bb.GetInt(o + bb_pos) : (int)0; } }
+  public sbyte Type { get { int o = __offset(4); return o != 0 ? bb.GetSbyte(o + bb_pos) : (sbyte)0; } }
+  public int ID { get { int o = __offset(6); return o != 0 ? bb.GetInt(o + bb_pos) : (int)0; } }
   public Vec3 Pos { get { return GetPos(new Vec3()); } }
-  public Vec3 GetPos(Vec3 obj) { int o = __offset(6); return o != 0 ? obj.__init(o + bb_pos, bb) : null; }
+  public Vec3 GetPos(Vec3 obj) { int o = __offset(8); return o != 0 ? obj.__init(o + bb_pos, bb) : null; }
   public Vec4 Rot { get { return GetRot(new Vec4()); } }
-  public Vec4 GetRot(Vec4 obj) { int o = __offset(8); return o != 0 ? obj.__init(o + bb_pos, bb) : null; }
+  public Vec4 GetRot(Vec4 obj) { int o = __offset(10); return o != 0 ? obj.__init(o + bb_pos, bb) : null; }
 
-  public static void StartObject(FlatBufferBuilder builder) { builder.StartObject(3); }
-  public static void AddID(FlatBufferBuilder builder, int ID) { builder.AddInt(0, ID, 0); }
-  public static void AddPos(FlatBufferBuilder builder, Offset<Vec3> posOffset) { builder.AddStruct(1, posOffset.Value, 0); }
-  public static void AddRot(FlatBufferBuilder builder, Offset<Vec4> rotOffset) { builder.AddStruct(2, rotOffset.Value, 0); }
+  public static void StartObject(FlatBufferBuilder builder) { builder.StartObject(4); }
+  public static void AddType(FlatBufferBuilder builder, sbyte Type) { builder.AddSbyte(0, Type, 0); }
+  public static void AddID(FlatBufferBuilder builder, int ID) { builder.AddInt(1, ID, 0); }
+  public static void AddPos(FlatBufferBuilder builder, Offset<Vec3> posOffset) { builder.AddStruct(2, posOffset.Value, 0); }
+  public static void AddRot(FlatBufferBuilder builder, Offset<Vec4> rotOffset) { builder.AddStruct(3, rotOffset.Value, 0); }
   public static Offset<Object> EndObject(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<Object>(o);
