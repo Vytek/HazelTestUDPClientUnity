@@ -191,6 +191,7 @@ public class NetworkManager : MonoBehaviour {
         HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.x, Pos.y, Pos.z));
         Debug.Log("POS SENT: " + Pos.x.ToString() + ", " + Pos.y.ToString() + ", " + Pos.z.ToString());
         HazelTest.Object.AddRot(fbb, Vec4.CreateVec4(fbb, Rot.x, Rot.y, Rot.z, Rot.w));
+        Debug.Log("ROT SENT: " + Rot.x.ToString() + ", " + Rot.y.ToString() + ", " + Rot.z.ToString() + ", " + Rot.w.ToString());
         var offset = HazelTest.Object.EndObject(fbb);
 
         HazelTest.Object.FinishObjectBuffer(fbb, offset);
@@ -234,7 +235,7 @@ public class NetworkManager : MonoBehaviour {
         Debug.Log("RECEIVED DATA : ");
         Debug.Log("IDObject RECEIVED : " + ObjectReceived.ID);
         Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
-
+        Debug.Log("ROT RECEIVED: " + ObjectReceived.Rot.X + ", " + ObjectReceived.Rot.Y + ", " + ObjectReceived.Rot.Z + ", "+ ObjectReceived.Rot.W);
         var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
         sbyte TypeBuffer = ObjectReceived.Type;
 

@@ -5,6 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MainScene.unity
     guid: e8d619a08602f422fb15f958b8565fab
+  - enabled: 1
+    path: Assets/Scenes/MainSceneRotation.unity
+    guid: cecd01d0c9c0b4c00863b68e3926eb0a
