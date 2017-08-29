@@ -28,6 +28,8 @@ public class NetworkCube : MonoBehaviour {
         //transform.position = new Vector3(newMessage.GameObjectPos.x, newMessage.GameObjectPos.y, newMessage.GameObjectPos.z);
 		lastPosition = nextPosition;
         transform.position = nextPosition;
+        lastRotation = nextRotation;
+        transform.rotation = nextRotation;
 		//Add rotation
         yield return null;
     }
@@ -44,6 +46,7 @@ public class NetworkCube : MonoBehaviour {
         if (newMessage.GameObjectID == objectID)
         {
             nextPosition = new Vector3(newMessage.GameObjectPos.x, newMessage.GameObjectPos.y, newMessage.GameObjectPos.z);
+            nextRotation = new Quaternion(newMessage.GameObjectRot.x, newMessage.GameObjectPos.y, newMessage.GameObjectRot.z, newMessage.GameObjectRot.w);
             UnityMainThreadDispatcher.Instance().Enqueue(ThisWillBeExecutedOnTheMainThread());
         }
     }
