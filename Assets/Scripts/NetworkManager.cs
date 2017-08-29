@@ -238,13 +238,13 @@ public class NetworkManager : MonoBehaviour {
         var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
         sbyte TypeBuffer = ObjectReceived.Type;
 
-        if (PacketId.PLAYER_JOIN.Equals(TypeBuffer))
+		if ((byte)PacketId.PLAYER_JOIN == ObjectReceived.Type)
         {
             //Code for new Player
             //Spawn something?
             //Using Dispatcher?
             Debug.Log("New Player!");
-        } else if (PacketId.OBJECT_MOVE.Equals(TypeBuffer))
+		} else if ((byte)PacketId.OBJECT_MOVE == ObjectReceived.Type)
         {
             ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
             ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;

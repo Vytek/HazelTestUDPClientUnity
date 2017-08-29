@@ -9,9 +9,10 @@ This is a Networking Demo based on:
 Projects used:
 
 - https://google.github.io/flatbuffers/ (Apache License, Version 2.0)
-	- http://exiin.com/blog/flatbuffers-for-unity-sample-code/
+- http://exiin.com/blog/flatbuffers-for-unity-sample-code/
 - https://github.com/neuecc/MessagePack-CSharp (MIT License)
 - https://github.com/CaptainHillman/UnityTools (MIT Licence)
+- https://github.com/HiddenMonk/Unity3DRuntimeTransformGizmo (MIT Licence)
 - https://github.com/PimDeWitte/UnityMainThreadDispatcher (Apache License, Version 2.0)
 - https://github.com/Deadcows/CustomLogger
 - ScreenLogger Unity Assets: https://www.assetstore.unity3d.com/en/#!/content/49114
