@@ -1,0 +1,9 @@
+mercoledì 30 agosto 2017 11:40:59
+
+Prima versione funzionante (0.1 Alfa? ;-)
+
+TODO:
+	- Cabiare ObjectID da INT a ushort	Da 0 a 65.535	Intero senza segno a 16 bit	System.UInt16 (Questo dovrebbe creare un pacchetto più piccolo)
+	- Ricreare quindi la relativa classe per flatbuffer
+	- Mandare messaggi UDP not Reliable? Migliora velocità?
+	- Prevedere il boolean isKinematic per VRTK ;-)
