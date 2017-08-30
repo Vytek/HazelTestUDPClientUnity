@@ -118,7 +118,8 @@ public class NetworkManager : MonoBehaviour {
 		NetworkEndPoint endPoint = new NetworkEndPoint(ipAddress, portNumber);
 		serverConn = new UdpClientConnection(endPoint);
 		serverConn.DataReceived += HandleDataFromServer;
-		Debug.Log("Connecting to " + endPoint);
+        serverConn.Disconnected += HandleServerDisconnect;
+        Debug.Log("Connecting to " + endPoint);
 		serverConn.Connect();
 	}
 
@@ -136,6 +137,12 @@ public class NetworkManager : MonoBehaviour {
 		serverConn = null;
 		args.Recycle();
 	}
+
+    void OnApplicationQuit()
+    {
+        Debug.Log("DisConnecting from: " + serverConn.EndPoint.ToString());
+        if (serverConn != null) serverConn.Close();
+    }
     #endregion
 
     #region NetworkLogic

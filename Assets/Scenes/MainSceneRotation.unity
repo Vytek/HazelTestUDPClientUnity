@@ -434,8 +434,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dd9223f521124a6b875db15f1ae2cc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 1
   portNumber: 4296
-  ipAddress: 127.0.0.1
+  ipAddress: 46.101.163.17
   CubeOne: {fileID: 2047531383}
 --- !u!4 &1268565725
 Transform:
