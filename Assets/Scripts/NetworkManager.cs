@@ -16,10 +16,12 @@ using HazelTest;
 /// </summary>
 public class NetworkManager : MonoBehaviour {
 
+	public bool DEBUG = true;
+
 	public int portNumber = 4296;
 	public string ipAddress = "127.0.0.1";
 
-  public GameObject CubeOne;
+    public GameObject CubeOne;
 
 	public struct ReceiveMessageFromGameObject {
         public sbyte MessageType;
@@ -164,7 +166,7 @@ public class NetworkManager : MonoBehaviour {
                 STypeBuffer = 0;
                 break;
         }
-        Debug.Log("SENDTYPE SENT: " + STypeBuffer);
+        //Debug.Log("SENDTYPE SENT: " + STypeBuffer); //DEBUG
 
         //Choose type message (TO Modify)
         switch (Type)
@@ -179,7 +181,7 @@ public class NetworkManager : MonoBehaviour {
                 TypeBuffer = 1;
                 break;
         }
-        Debug.Log("TYPE SENT: " + TypeBuffer);
+       //Debug.Log("TYPE SENT: " + TypeBuffer); //DEBUG
 
         // Create flatbuffer class
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
@@ -187,15 +189,17 @@ public class NetworkManager : MonoBehaviour {
         HazelTest.Object.StartObject(fbb);
         HazelTest.Object.AddType(fbb, TypeBuffer);
         HazelTest.Object.AddID(fbb, IDObject);
-        Debug.Log("ID SENT: " + IDObject);
-        HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.x, Pos.y, Pos.z));
-        Debug.Log("POS SENT: " + Pos.x.ToString() + ", " + Pos.y.ToString() + ", " + Pos.z.ToString());
+        HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.x, Pos.y, Pos.z));    
         HazelTest.Object.AddRot(fbb, Vec4.CreateVec4(fbb, Rot.x, Rot.y, Rot.z, Rot.w));
-        Debug.Log("ROT SENT: " + Rot.x.ToString() + ", " + Rot.y.ToString() + ", " + Rot.z.ToString() + ", " + Rot.w.ToString());
+		if (DEBUG) 
+		{
+			Debug.Log ("ID SENT: " + IDObject);
+			Debug.Log ("POS SENT: " + Pos.x.ToString () + ", " + Pos.y.ToString () + ", " + Pos.z.ToString ());
+			Debug.Log ("ROT SENT: " + Rot.x.ToString () + ", " + Rot.y.ToString () + ", " + Rot.z.ToString () + ", " + Rot.w.ToString ());
+		}
         var offset = HazelTest.Object.EndObject(fbb);
 
         HazelTest.Object.FinishObjectBuffer(fbb, offset);
-        //CubeOne.transform.position
 
         using (var ms = new MemoryStream(fbb.DataBuffer.Data, fbb.DataBuffer.Position, fbb.Offset))
         {
@@ -205,7 +209,10 @@ public class NetworkManager : MonoBehaviour {
             ms.ToArray().CopyTo(newArray, 1);
             newArray[0] = STypeBuffer;
             serverConn.SendBytes(newArray, SendOption.Reliable);
-            Debug.Log("Message sent!");
+			if (DEBUG) 
+			{
+				Debug.Log ("Message sent!");
+			}
         }
     }
 
@@ -231,11 +238,13 @@ public class NetworkManager : MonoBehaviour {
 
         //Please see: https://stackoverflow.com/questions/748062/how-can-i-return-multiple-values-from-a-function-in-c
         HazelTest.Object ObjectReceived = HazelTest.Object.GetRootAsObject(bb);
-
-        Debug.Log("RECEIVED DATA : ");
-        Debug.Log("IDObject RECEIVED : " + ObjectReceived.ID);
-        Debug.Log("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
-        Debug.Log("ROT RECEIVED: " + ObjectReceived.Rot.X + ", " + ObjectReceived.Rot.Y + ", " + ObjectReceived.Rot.Z + ", "+ ObjectReceived.Rot.W);
+		if (DEBUG) 
+		{
+			Debug.Log ("RECEIVED DATA : ");
+			Debug.Log ("IDObject RECEIVED : " + ObjectReceived.ID);
+			Debug.Log ("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
+			Debug.Log ("ROT RECEIVED: " + ObjectReceived.Rot.X + ", " + ObjectReceived.Rot.Y + ", " + ObjectReceived.Rot.Z + ", " + ObjectReceived.Rot.W);
+		}
         var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
         sbyte TypeBuffer = ObjectReceived.Type;
 
@@ -250,7 +259,7 @@ public class NetworkManager : MonoBehaviour {
             ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
             ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
             ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
-            ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Y, ObjectReceived.Rot.W);
+            ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W);
 
             if (OnReceiveMessageFromGameObjectUpdate != null)
                 OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
