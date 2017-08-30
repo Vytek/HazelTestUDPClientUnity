@@ -7,3 +7,4 @@ TODO:
 	- Ricreare quindi la relativa classe per flatbuffer
 	- Mandare messaggi UDP not Reliable? Migliora velocità?
 	- Prevedere il boolean isKinematic per VRTK ;-)
+	- Usare ID univoco: https://stackoverflow.com/questions/9543715/generating-human-readable-usable-short-but-unique-ids
