@@ -5,6 +5,7 @@ This is a Networking Demo based on:
 
 - https://github.com/DarkRiftNetworking/Hazel-Networking (MIT License)
 - https://github.com/Vytek/HazelTest
+- Stub from: https://forum.unity3d.com/threads/hazel-networking-open-source-rudp-tcp-library.409863/page-2#post-3006994 (Thanks JoeStrout)
 
 Projects used:
 
