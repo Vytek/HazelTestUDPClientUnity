@@ -45,7 +45,7 @@ public sealed class Object : Table {
   public Object __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public sbyte Type { get { int o = __offset(4); return o != 0 ? bb.GetSbyte(o + bb_pos) : (sbyte)0; } }
-  public int ID { get { int o = __offset(6); return o != 0 ? bb.GetInt(o + bb_pos) : (int)0; } }
+  public ushort ID { get { int o = __offset(6); return o != 0 ? bb.GetUshort(o + bb_pos) : (ushort)0; } }
   public Vec3 Pos { get { return GetPos(new Vec3()); } }
   public Vec3 GetPos(Vec3 obj) { int o = __offset(8); return o != 0 ? obj.__init(o + bb_pos, bb) : null; }
   public Vec4 Rot { get { return GetRot(new Vec4()); } }
@@ -53,7 +53,7 @@ public sealed class Object : Table {
 
   public static void StartObject(FlatBufferBuilder builder) { builder.StartObject(4); }
   public static void AddType(FlatBufferBuilder builder, sbyte Type) { builder.AddSbyte(0, Type, 0); }
-  public static void AddID(FlatBufferBuilder builder, int ID) { builder.AddInt(1, ID, 0); }
+  public static void AddID(FlatBufferBuilder builder, ushort ID) { builder.AddUshort(1, ID, 0); }
   public static void AddPos(FlatBufferBuilder builder, Offset<Vec3> posOffset) { builder.AddStruct(2, posOffset.Value, 0); }
   public static void AddRot(FlatBufferBuilder builder, Offset<Vec4> rotOffset) { builder.AddStruct(3, rotOffset.Value, 0); }
   public static Offset<Object> EndObject(FlatBufferBuilder builder) {
