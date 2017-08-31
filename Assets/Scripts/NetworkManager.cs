@@ -25,7 +25,7 @@ public class NetworkManager : MonoBehaviour {
 
 	public struct ReceiveMessageFromGameObject {
         public sbyte MessageType;
-        public int GameObjectID;
+        public ushort GameObjectID;
 		public Vector3 GameObjectPos;
 		public Quaternion GameObjectRot;
 	};
@@ -153,7 +153,7 @@ public class NetworkManager : MonoBehaviour {
     /// <param name="IDObject"></param>
     /// <param name="Pos"></param>
     /// <param name="Rot"></param>
-    public void SendMessage(SendType SType, PacketId Type, int IDObject, Vector3 Pos, Quaternion Rot) {
+    public void SendMessage(SendType SType, PacketId Type, ushort IDObject, Vector3 Pos, Quaternion Rot) {
         sbyte TypeBuffer = 0;
         byte STypeBuffer = 0;
 
