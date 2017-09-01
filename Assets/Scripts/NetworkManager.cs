@@ -50,7 +50,19 @@ public class NetworkManager : MonoBehaviour {
 	/// </summary>
 	public enum PacketId: sbyte {
 		PLAYER_JOIN = 0,
-		OBJECT_MOVE = 1
+		OBJECT_MOVE = 1,
+		PLAYER_SPAWN = 2,
+		OBJECT_SPAWN = 3,
+		MESSAGE_SERVER = 4
+	}
+
+	/// <summary>
+	/// Command type.
+	/// </summary>
+	public enum CommandType : sbyte
+	{
+		LOGIN = 0,
+		DISCONNECTEDCLIENT = 1
 	}
 
 	// Client Data
@@ -184,11 +196,20 @@ public class NetworkManager : MonoBehaviour {
             case PacketId.OBJECT_MOVE:
                 TypeBuffer = 1;
                 break;
+			case PacketId.PLAYER_SPAWN:
+				TypeBuffer = 2;
+				break;
+			case PacketId.OBJECT_SPAWN:
+				TypeBuffer = 3;
+				break;
+			case PacketId.MESSAGE_SERVER:
+				TypeBuffer = 4;
+				break;
             default:
                 TypeBuffer = 1;
                 break;
         }
-       //Debug.Log("TYPE SENT: " + TypeBuffer); //DEBUG
+        //Debug.Log("TYPE SENT: " + TypeBuffer); //DEBUG
 
         // Create flatbuffer class
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
@@ -222,6 +243,14 @@ public class NetworkManager : MonoBehaviour {
 			}
         }
     }
+
+	/// <summary>
+	/// Sends the message to server.
+	/// </summary>
+	public void SendMessageToServer()
+	{
+	
+	}
 
 	/// <summary>
 	/// Receives the message.
