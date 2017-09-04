@@ -532,7 +532,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 1
   portNumber: 4296
-  ipAddress: 46.101.163.17
+  ipAddress: 127.0.0.1
+  UID: 
   CubeOne: {fileID: 2047531383}
 --- !u!4 &1268565725
 Transform:

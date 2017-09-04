@@ -21,6 +21,8 @@ public class NetworkManager : MonoBehaviour {
 	public int portNumber = 4296;
 	public string ipAddress = "127.0.0.1";
 
+	public string UID = String.Empty;
+
     public GameObject CubeOne;
 
 	public struct ReceiveMessageFromGameObject {
@@ -39,10 +41,12 @@ public class NetworkManager : MonoBehaviour {
 	/// <summary>
 	/// Send type.
 	/// </summary>
-	public enum SendType {
+	public enum SendType: byte
+	{
 		SENDTOALL = 0,
 		SENDTOOTHER = 1,
-		SENDTOSERVER = 2
+		SENDTOSERVER = 2,
+		SENDTOUID = 3
 	}
 
 	/// <summary>
@@ -114,7 +118,8 @@ public class NetworkManager : MonoBehaviour {
 		Debug.Log("Network idle.");
 		StartClient (ipAddress);
 		Debug.Log("Network Started.");
-		serverConn.SendBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, SendOption.Reliable);
+		//serverConn.SendBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, SendOption.Reliable); //DEBUG
+		SendMessageToServer((sbyte)CommandType.LOGIN);
 		Debug.Log("Network Trasmitted.");
 	}
 
@@ -247,9 +252,33 @@ public class NetworkManager : MonoBehaviour {
 	/// <summary>
 	/// Sends the message to server.
 	/// </summary>
-	public void SendMessageToServer()
+	public void SendMessageToServer(CommandType Command)
 	{
-	
+		//Encode FlatBuffer
+		//Create flatbuffer class
+		FlatBufferBuilder fbb = new FlatBufferBuilder(1);
+
+		StringOffset SOUIDBuffer = fbb.CreateString(String.Empty);
+
+		HazelMessage.HMessage.StartHMessage(fbb);
+		HazelMessage.HMessage.AddCommand(fbb, (sbyte)Command);
+		HazelMessage.HMessage.AddAnswer(fbb, SOUIDBuffer);
+		var offset = HazelMessage.HMessage.EndHMessage(fbb);
+		HazelMessage.HMessage.FinishHMessageBuffer(fbb, offset);
+		//Reply to Client
+		using (var ms = new MemoryStream(fbb.DataBuffer.Data, fbb.DataBuffer.Position, fbb.Offset))
+		{
+			//Add type!
+			//https://stackoverflow.com/questions/5591329/c-sharp-how-to-add-byte-to-byte-array
+			byte[] newArray = new byte[ms.ToArray().Length + 1];
+			ms.ToArray().CopyTo(newArray, 1);
+			newArray[0] = (byte)SendType.SENDTOSERVER;
+			serverConn.SendBytes(newArray, SendOption.Reliable);
+		}
+		if (DEBUG) 
+		{
+			Debug.Log ("Message sent!");
+		}
 	}
 
 	/// <summary>
@@ -265,41 +294,49 @@ public class NetworkManager : MonoBehaviour {
         Array.Copy(BufferReceiver, 1, NewBufferReceiver, 0, NewBufferReceiver.Length);
         ByteBuffer bb = new ByteBuffer(NewBufferReceiver);
 
-        /*
-        if (!HazelTest.Object.))
-        {
-            throw new Exception("Identifier test failed, you sure the identifier is identical to the generated schema's one?");
-        }
-        */
+		if ((STypeBuffer == (byte)SendType.SENDTOALL) || (STypeBuffer == (byte)SendType.SENDTOOTHER)) {
 
-        //Please see: https://stackoverflow.com/questions/748062/how-can-i-return-multiple-values-from-a-function-in-c
-        HazelTest.Object ObjectReceived = HazelTest.Object.GetRootAsObject(bb);
-		if (DEBUG) 
+			/*
+	        if (!HazelTest.Object.))
+	        {
+	            throw new Exception("Identifier test failed, you sure the identifier is identical to the generated schema's one?");
+	        }
+	        */
+
+			//Please see: https://stackoverflow.com/questions/748062/how-can-i-return-multiple-values-from-a-function-in-c
+			HazelTest.Object ObjectReceived = HazelTest.Object.GetRootAsObject (bb);
+			if (DEBUG) {
+				Debug.Log ("RECEIVED DATA : ");
+				Debug.Log ("IDObject RECEIVED : " + ObjectReceived.ID);
+				Debug.Log ("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
+				Debug.Log ("ROT RECEIVED: " + ObjectReceived.Rot.X + ", " + ObjectReceived.Rot.Y + ", " + ObjectReceived.Rot.Z + ", " + ObjectReceived.Rot.W);
+			}
+			var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject ();
+			sbyte TypeBuffer = ObjectReceived.Type;
+
+			if ((byte)PacketId.PLAYER_JOIN == ObjectReceived.Type) {
+				//Code for new Player
+				//Spawn something?
+				//Using Dispatcher?
+				Debug.Log ("New Player!");
+			} else if ((byte)PacketId.OBJECT_MOVE == ObjectReceived.Type) {
+				ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
+				ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
+				ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3 (ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
+				ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion (ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W);
+
+				if (OnReceiveMessageFromGameObjectUpdate != null)
+					OnReceiveMessageFromGameObjectUpdate (ReceiveMessageFromGameObjectBuffer);
+			}
+		} else if (STypeBuffer == (byte)SendType.SENDTOSERVER) 
 		{
-			Debug.Log ("RECEIVED DATA : ");
-			Debug.Log ("IDObject RECEIVED : " + ObjectReceived.ID);
-			Debug.Log ("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
-			Debug.Log ("ROT RECEIVED: " + ObjectReceived.Rot.X + ", " + ObjectReceived.Rot.Y + ", " + ObjectReceived.Rot.Z + ", " + ObjectReceived.Rot.W);
+			HazelMessage.HMessage HMessageReceived = HazelMessage.HMessage.GetRootAsHMessage(bb);
+			if ((sbyte)CommandType.LOGIN == HMessageReceived.Command)
+			{
+				this.UID = HMessageReceived.Answer;
+				Debug.Log ("UID RECEIVED: " + HMessageReceived.Answer);
+			}
 		}
-        var ReceiveMessageFromGameObjectBuffer = new ReceiveMessageFromGameObject();
-        sbyte TypeBuffer = ObjectReceived.Type;
-
-		if ((byte)PacketId.PLAYER_JOIN == ObjectReceived.Type)
-        {
-            //Code for new Player
-            //Spawn something?
-            //Using Dispatcher?
-            Debug.Log("New Player!");
-		} else if ((byte)PacketId.OBJECT_MOVE == ObjectReceived.Type)
-        {
-            ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
-            ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
-            ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
-            ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W);
-
-            if (OnReceiveMessageFromGameObjectUpdate != null)
-                OnReceiveMessageFromGameObjectUpdate(ReceiveMessageFromGameObjectBuffer);
-        } 
     }
     #endregion
 
