@@ -24,10 +24,14 @@ public class NetworkManager : MonoBehaviour {
 	public string UID = String.Empty;
 
     public GameObject CubeOne;
+	public GameObject PlayerPrefab;
+	public GameObject PlayerME;
 
 	public struct ReceiveMessageFromGameObject {
         public sbyte MessageType;
         public ushort GameObjectID;
+		public string GamePlayerObjectOwner;
+		public bool isKinematic;
 		public Vector3 GameObjectPos;
 		public Quaternion GameObjectRot;
 	};
@@ -57,7 +61,8 @@ public class NetworkManager : MonoBehaviour {
 		OBJECT_MOVE = 1,
 		PLAYER_SPAWN = 2,
 		OBJECT_SPAWN = 3,
-		MESSAGE_SERVER = 4
+		PLAYER_MOVE = 4,
+		MESSAGE_SERVER = 5
 	}
 
 	/// <summary>
@@ -110,7 +115,7 @@ public class NetworkManager : MonoBehaviour {
 		}
 	}
 		
-	/// <summary>
+	/// <summary
 	/// Start this instance.
 	/// </summary>
 	void Start() {
@@ -120,6 +125,9 @@ public class NetworkManager : MonoBehaviour {
 		Debug.Log("Network Started.");
 		//serverConn.SendBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, SendOption.Reliable); //DEBUG
 		SendMessageToServer((sbyte)CommandType.LOGIN);
+		Debug.Log ("UID RECEIVED AT START: " + this.UID);
+		//Add PLAYER_JOIN MESSAGE (SENDTOOTHER)
+		//SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, PlayerME.transform.position, PlayerME.transform.rotation);
 		Debug.Log("Network Trasmitted.");
 	}
 
@@ -170,7 +178,7 @@ public class NetworkManager : MonoBehaviour {
     /// <param name="IDObject"></param>
     /// <param name="Pos"></param>
     /// <param name="Rot"></param>
-    public void SendMessage(SendType SType, PacketId Type, ushort IDObject, Vector3 Pos, Quaternion Rot) {
+    public void SendMessage(SendType SType, PacketId Type, ushort IDObject, string OwnerPlayer, bool isKine, Vector3 Pos, Quaternion Rot) {
         sbyte TypeBuffer = 0;
         byte STypeBuffer = 0;
 
@@ -207,8 +215,11 @@ public class NetworkManager : MonoBehaviour {
 			case PacketId.OBJECT_SPAWN:
 				TypeBuffer = 3;
 				break;
-			case PacketId.MESSAGE_SERVER:
+			case PacketId.PLAYER_MOVE:
 				TypeBuffer = 4;
+				break;
+			case PacketId.MESSAGE_SERVER:
+				TypeBuffer = 5;
 				break;
             default:
                 TypeBuffer = 1;
@@ -219,14 +230,19 @@ public class NetworkManager : MonoBehaviour {
         // Create flatbuffer class
         FlatBufferBuilder fbb = new FlatBufferBuilder(1);
 
+		StringOffset SOUIDBuffer = fbb.CreateString(OwnerPlayer);
+
         HazelTest.Object.StartObject(fbb);
         HazelTest.Object.AddType(fbb, TypeBuffer);
+		HazelTest.Object.AddOwner (fbb, SOUIDBuffer);
+		HazelTest.Object.AddIsKine (fbb, isKine);
         HazelTest.Object.AddID(fbb, IDObject);
         HazelTest.Object.AddPos(fbb, Vec3.CreateVec3(fbb, Pos.x, Pos.y, Pos.z));    
         HazelTest.Object.AddRot(fbb, Vec4.CreateVec4(fbb, Rot.x, Rot.y, Rot.z, Rot.w));
 		if (DEBUG) 
 		{
 			Debug.Log ("ID SENT: " + IDObject);
+			Debug.Log ("UID SENT: " + OwnerPlayer);
 			Debug.Log ("POS SENT: " + Pos.x.ToString () + ", " + Pos.y.ToString () + ", " + Pos.z.ToString ());
 			Debug.Log ("ROT SENT: " + Rot.x.ToString () + ", " + Rot.y.ToString () + ", " + Rot.z.ToString () + ", " + Rot.w.ToString ());
 		}
@@ -308,6 +324,8 @@ public class NetworkManager : MonoBehaviour {
 			if (DEBUG) {
 				Debug.Log ("RECEIVED DATA : ");
 				Debug.Log ("IDObject RECEIVED : " + ObjectReceived.ID);
+				Debug.Log ("UID RECEIVED ; " + ObjectReceived.Owner);
+				Debug.Log ("isKinematc : " + ObjectReceived.IsKine);
 				Debug.Log ("POS RECEIVED: " + ObjectReceived.Pos.X + ", " + ObjectReceived.Pos.Y + ", " + ObjectReceived.Pos.Z);
 				Debug.Log ("ROT RECEIVED: " + ObjectReceived.Rot.X + ", " + ObjectReceived.Rot.Y + ", " + ObjectReceived.Rot.Z + ", " + ObjectReceived.Rot.W);
 			}
@@ -315,13 +333,22 @@ public class NetworkManager : MonoBehaviour {
 			sbyte TypeBuffer = ObjectReceived.Type;
 
 			if ((byte)PacketId.PLAYER_JOIN == ObjectReceived.Type) {
+				Debug.Log ("Add new Player!");
 				//Code for new Player
 				//Spawn something?
-				//Using Dispatcher?
-				Debug.Log ("New Player!");
+				//Using Dispatcher? YES
+				UnityMainThreadDispatcher.Instance().Enqueue(SpawnPlayerInMainThread(new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z), new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W), ObjectReceived.Owner));
 			} else if ((byte)PacketId.OBJECT_MOVE == ObjectReceived.Type) {
 				ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
 				ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
+				ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3 (ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
+				ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion (ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W);
+
+				if (OnReceiveMessageFromGameObjectUpdate != null)
+					OnReceiveMessageFromGameObjectUpdate (ReceiveMessageFromGameObjectBuffer);
+			} else if ((byte)PacketId.PLAYER_MOVE == ObjectReceived.Type) {
+				ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
+				ReceiveMessageFromGameObjectBuffer.GamePlayerObjectOwner = ObjectReceived.Owner;
 				ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3 (ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
 				ReceiveMessageFromGameObjectBuffer.GameObjectRot = new Quaternion (ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W);
 
@@ -334,11 +361,29 @@ public class NetworkManager : MonoBehaviour {
 			if ((sbyte)CommandType.LOGIN == HMessageReceived.Command)
 			{
 				this.UID = HMessageReceived.Answer;
+				UnityMainThreadDispatcher.Instance().Enqueue(SetUIDInMainThread(HMessageReceived.Answer));
 				Debug.Log ("UID RECEIVED: " + HMessageReceived.Answer);
+				SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, Vector3.zero, Quaternion.identity);
 			}
 		}
     }
     #endregion
+
+	public IEnumerator SetUIDInMainThread(string UID)
+	{
+		this.PlayerME.GetComponent<NewtorkPlayerME> ().UID = UID;
+		yield return null;
+	}
+
+	public IEnumerator SpawnPlayerInMainThread(Vector3 pos, Quaternion rot, string UID)
+	{
+		//Instantiate the player
+		GameObject clone = (GameObject)Instantiate (PlayerPrefab, pos, rot);
+		//Tell the network player who owns it so it tunes into the right updates.
+		clone.GetComponent<NetworkPlayer>().UID = UID;
+		//Assing UID to Player Spawned
+		yield return null;
+	}
 
 	#region Utility
 	//https://stackoverflow.com/questions/29693870/conversion-between-vector3-coordinates-and-string

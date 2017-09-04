@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class NetworkCube : MonoBehaviour {
@@ -55,7 +56,7 @@ public class NetworkCube : MonoBehaviour {
     void Update () {
         if ((Vector3.Distance(transform.position, lastPosition) > 0.05) || (Quaternion.Angle(transform.rotation, lastRotation) > 0.3))
         {
-            NetworkManager.instance.SendMessage(NetworkManager.SendType.SENDTOOTHER, NetworkManager.PacketId.OBJECT_MOVE, this.objectID, transform.position, transform.rotation);
+			NetworkManager.instance.SendMessage(NetworkManager.SendType.SENDTOOTHER, NetworkManager.PacketId.OBJECT_MOVE, this.objectID, String.Empty, true ,transform.position, transform.rotation);
             //Update stuff
             lastPosition = transform.position;
             lastRotation = transform.rotation;
