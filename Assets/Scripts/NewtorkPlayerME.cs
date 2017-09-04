@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class NewtorkPlayerME : MonoBehaviour {
 
 	//The UID of Player
-	public string UID; //NOT WORKING?
+	public string UID = String.Empty; //NOT WORKING?
 	public bool DEBUG = true;
 
 	Vector3 lastPosition = Vector3.zero;
@@ -19,7 +20,9 @@ public class NewtorkPlayerME : MonoBehaviour {
 		//Initialize
 		lastPosition = transform.position;
 		lastRotation = transform.rotation;
-	}
+        //SendMessage NOT HERE!
+        //NetworkManager.instance.SendMessage(NetworkManager.SendType.SENDTOOTHER, NetworkManager.PacketId.PLAYER_JOIN, 0, this.UID, true, lastPosition, lastRotation);
+    }
 	
 	// Update is called once per frame
 	void Update () {

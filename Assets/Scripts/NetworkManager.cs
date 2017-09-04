@@ -27,7 +27,10 @@ public class NetworkManager : MonoBehaviour {
 	public GameObject PlayerPrefab;
 	public GameObject PlayerME;
 
-	public struct ReceiveMessageFromGameObject {
+    private Vector3 lastPosition = Vector3.zero;
+    private Quaternion lastRotation = Quaternion.identity;
+
+    public struct ReceiveMessageFromGameObject {
         public sbyte MessageType;
         public ushort GameObjectID;
 		public string GamePlayerObjectOwner;
@@ -125,9 +128,10 @@ public class NetworkManager : MonoBehaviour {
 		Debug.Log("Network Started.");
 		//serverConn.SendBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, SendOption.Reliable); //DEBUG
 		SendMessageToServer((sbyte)CommandType.LOGIN);
-		Debug.Log ("UID RECEIVED AT START: " + this.UID);
-		//Add PLAYER_JOIN MESSAGE (SENDTOOTHER)
-		//SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, PlayerME.transform.position, PlayerME.transform.rotation);
+        //Add PLAYER_JOIN MESSAGE (SENDTOOTHER)
+        //SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, PlayerME.transform.position, PlayerME.transform.rotation);
+        lastPosition = PlayerME.transform.position;
+        lastRotation = PlayerME.transform.rotation; 
 		Debug.Log("Network Trasmitted.");
 	}
 
@@ -338,7 +342,9 @@ public class NetworkManager : MonoBehaviour {
 				//Spawn something?
 				//Using Dispatcher? YES
 				UnityMainThreadDispatcher.Instance().Enqueue(SpawnPlayerInMainThread(new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z), new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W), ObjectReceived.Owner));
-			} else if ((byte)PacketId.OBJECT_MOVE == ObjectReceived.Type) {
+                //PlayerSpawn
+                SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_SPAWN, 0, this.UID, true, lastPosition, lastRotation);
+        } else if ((byte)PacketId.OBJECT_MOVE == ObjectReceived.Type) {
 				ReceiveMessageFromGameObjectBuffer.MessageType = ObjectReceived.Type;
 				ReceiveMessageFromGameObjectBuffer.GameObjectID = ObjectReceived.ID;
 				ReceiveMessageFromGameObjectBuffer.GameObjectPos = new Vector3 (ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z);
@@ -354,7 +360,9 @@ public class NetworkManager : MonoBehaviour {
 
 				if (OnReceiveMessageFromGameObjectUpdate != null)
 					OnReceiveMessageFromGameObjectUpdate (ReceiveMessageFromGameObjectBuffer);
-			}
+			} else if ((byte)PacketId.PLAYER_SPAWN == ObjectReceived.Type)  {
+                UnityMainThreadDispatcher.Instance().Enqueue(SpawnPlayerInMainThread(new Vector3(ObjectReceived.Pos.X, ObjectReceived.Pos.Y, ObjectReceived.Pos.Z), new Quaternion(ObjectReceived.Rot.X, ObjectReceived.Rot.Y, ObjectReceived.Rot.Z, ObjectReceived.Rot.W), ObjectReceived.Owner));
+            }
 		} else if (STypeBuffer == (byte)SendType.SENDTOSERVER) 
 		{
 			HazelMessage.HMessage HMessageReceived = HazelMessage.HMessage.GetRootAsHMessage(bb);
@@ -363,13 +371,25 @@ public class NetworkManager : MonoBehaviour {
 				this.UID = HMessageReceived.Answer;
 				UnityMainThreadDispatcher.Instance().Enqueue(SetUIDInMainThread(HMessageReceived.Answer));
 				Debug.Log ("UID RECEIVED: " + HMessageReceived.Answer);
-				SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, Vector3.zero, Quaternion.identity);
+                //PLAYER_JOIN MESSAGE (SENDTOOTHER)
+                SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, lastPosition, lastRotation);
 			}
 		}
     }
     #endregion
 
-	public IEnumerator SetUIDInMainThread(string UID)
+    // Update is called once per frame
+    void Update()
+    {
+        if ((Vector3.Distance(transform.position, lastPosition) > 0.05) || (Quaternion.Angle(transform.rotation, lastRotation) > 0.3))
+        {
+            //Update stuff
+            lastPosition = PlayerME.transform.position;
+            lastRotation = PlayerME.transform.rotation;
+        }
+    }
+
+    public IEnumerator SetUIDInMainThread(string UID)
 	{
 		this.PlayerME.GetComponent<NewtorkPlayerME> ().UID = UID;
 		yield return null;
