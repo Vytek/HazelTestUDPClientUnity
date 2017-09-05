@@ -27,7 +27,8 @@ public class NetworkPlayer : MonoBehaviour {
 	{
 		if (newMessage.PlayerGameObjectUID == this.UID)
 		{
-			Destroy (gameObject);
+			UnityMainThreadDispatcher.Instance().Enqueue(DestroyGameObjectOnTheMainThread());
+			Debug.Log ("Raise event in Player GameObject");
 		}
 	}
 
@@ -39,6 +40,13 @@ public class NetworkPlayer : MonoBehaviour {
 		transform.position = nextPosition;
 		lastRotation = nextRotation;
 		transform.rotation = nextRotation;
+		yield return null;
+	}
+
+	public IEnumerator DestroyGameObjectOnTheMainThread()
+	{
+		Destroy (gameObject);
+		Debug.Log ("Destroy Player GameObject");
 		yield return null;
 	}
 
