@@ -17,9 +17,18 @@ public class NetworkPlayer : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		NetworkManager.OnReceiveMessageFromGameObjectUpdate += NetworkManager_OnReceiveMessageFromGameObjectUpdate;
+		NetworkManager.OnDisconnectedClientUpdate += NetworkManager_OnDisconnectedClientUpdate;
 		//Initialize
 		lastPosition = transform.position;
 		lastRotation = transform.rotation;
+	}
+
+	void NetworkManager_OnDisconnectedClientUpdate (NetworkManager.DisconnectedClientToDestroyPlayerGameObject newMessage)
+	{
+		if (newMessage.PlayerGameObjectUID == this.UID)
+		{
+			Destroy (GameObject);
+		}
 	}
 
 	public IEnumerator ThisWillBeExecutedOnTheMainThread()
@@ -35,12 +44,14 @@ public class NetworkPlayer : MonoBehaviour {
 
 	void NetworkManager_OnReceiveMessageFromGameObjectUpdate (NetworkManager.ReceiveMessageFromGameObject newMessage)
 	{
-		Debug.Log ("Raise event in Player GameObject");
-		Debug.Log (newMessage.MessageType);
-		Debug.Log (newMessage.GamePlayerObjectOwner);
-		Debug.Log (newMessage.GameObjectPos);
-		Debug.Log (newMessage.GameObjectRot);
-
+		if (DEBUG) 
+		{
+			Debug.Log ("Raise event in Player GameObject");
+			Debug.Log (newMessage.MessageType);
+			Debug.Log (newMessage.GamePlayerObjectOwner);
+			Debug.Log (newMessage.GameObjectPos);
+			Debug.Log (newMessage.GameObjectRot);
+		}
 		//Update pos and rot
 		if (newMessage.GamePlayerObjectOwner == UID)
 		{

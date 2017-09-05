@@ -48,7 +48,8 @@ public class NetworkManager : MonoBehaviour {
 	//Events
 	public delegate void ReceiveMessageUpdate(ReceiveMessageFromGameObject newMessage);
 	public static event ReceiveMessageUpdate OnReceiveMessageFromGameObjectUpdate;
-	//Add OnDisconnectedClient
+	public delegate void DisconnectedClientUpdate(DisconnectedClientToDestroyPlayerGameObject newMessage);
+	public static event DisconnectedClientUpdate OnDisconnectedClientUpdate;
 
 	/// <summary>
 	/// Send type.
@@ -133,7 +134,7 @@ public class NetworkManager : MonoBehaviour {
 		Debug.Log("Network Started.");
 		//serverConn.SendBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, SendOption.Reliable); //DEBUG
 		SendMessageToServer((sbyte)CommandType.LOGIN);
-        //Add PLAYER_JOIN MESSAGE (SENDTOOTHER)
+        //Add PLAYER_JOIN MESSAGE (SENDTOOTHER) NOT HERE TIMER/THREAD PROBLEM 
         //SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, PlayerME.transform.position, PlayerME.transform.rotation);
         lastPosition = PlayerME.transform.position;
         lastRotation = PlayerME.transform.rotation; 
@@ -380,6 +381,11 @@ public class NetworkManager : MonoBehaviour {
 			} else if ((sbyte)CommandType.DISCONNECTEDCLIENT == HMessageReceived.Command) {
 				//Debug Disconnected UID
 				Debug.Log ("UID RECEIVED and TO DESTROY: " + HMessageReceived.Answer);
+				var DisconnectedClientToDestroyPlayerGameObjectBuffer = new DisconnectedClientToDestroyPlayerGameObject ();
+				DisconnectedClientToDestroyPlayerGameObjectBuffer.PlayerGameObjectUID = HMessageReceived.Answer;
+
+				if (OnDisconnectedClientUpdate != null)
+					OnDisconnectedClientUpdate (DisconnectedClientToDestroyPlayerGameObjectBuffer);
 			}
 		}
     }
