@@ -39,11 +39,16 @@ public class NetworkManager : MonoBehaviour {
 		public Quaternion GameObjectRot;
 	};
 
+	public struct DisconnectedClientToDestroyPlayerGameObject {
+		public string PlayerGameObjectUID;
+	};
+
 	private static NetworkManager _instance = null;
 
 	//Events
 	public delegate void ReceiveMessageUpdate(ReceiveMessageFromGameObject newMessage);
 	public static event ReceiveMessageUpdate OnReceiveMessageFromGameObjectUpdate;
+	//Add OnDisconnectedClient
 
 	/// <summary>
 	/// Send type.
@@ -366,13 +371,15 @@ public class NetworkManager : MonoBehaviour {
 		} else if (STypeBuffer == (byte)SendType.SENDTOSERVER) 
 		{
 			HazelMessage.HMessage HMessageReceived = HazelMessage.HMessage.GetRootAsHMessage(bb);
-			if ((sbyte)CommandType.LOGIN == HMessageReceived.Command)
-			{
+			if ((sbyte)CommandType.LOGIN == HMessageReceived.Command) {
 				this.UID = HMessageReceived.Answer;
-				UnityMainThreadDispatcher.Instance().Enqueue(SetUIDInMainThread(HMessageReceived.Answer));
+				UnityMainThreadDispatcher.Instance ().Enqueue (SetUIDInMainThread (HMessageReceived.Answer));
 				Debug.Log ("UID RECEIVED: " + HMessageReceived.Answer);
                 //PLAYER_JOIN MESSAGE (SENDTOOTHER)
                 SendMessage(SendType.SENDTOOTHER, PacketId.PLAYER_JOIN, 0, this.UID, true, lastPosition, lastRotation);
+			} else if ((sbyte)CommandType.DISCONNECTEDCLIENT == HMessageReceived.Command) {
+				//Debug Disconnected UID
+				Debug.Log ("UID RECEIVED and TO DESTROY: " + HMessageReceived.Answer);
 			}
 		}
     }
