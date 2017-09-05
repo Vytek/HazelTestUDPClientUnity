@@ -27,7 +27,7 @@ public class NetworkPlayer : MonoBehaviour {
 	{
 		if (newMessage.PlayerGameObjectUID == this.UID)
 		{
-			Destroy (GameObject);
+			Destroy (gameObject);
 		}
 	}
 
