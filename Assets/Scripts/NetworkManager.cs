@@ -267,7 +267,7 @@ public class NetworkManager : MonoBehaviour {
             byte[] newArray = new byte[ms.ToArray().Length + 1];
             ms.ToArray().CopyTo(newArray, 1);
             newArray[0] = STypeBuffer;
-            serverConn.SendBytes(newArray, SendOption.Reliable);
+			serverConn.SendBytes(newArray, SendOption.Reliable);
 			if (DEBUG) 
 			{
 				Debug.Log ("Message sent!");

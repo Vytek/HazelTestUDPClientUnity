@@ -7,6 +7,7 @@ public class NetworkPlayer : MonoBehaviour {
 	//The UID of Player
 	public string UID;
 	public bool DEBUG = true;
+	public bool LOCAL = false;
 
 	Vector3 lastPosition = Vector3.zero;
 	Vector3 nextPosition = Vector3.zero;
@@ -19,8 +20,16 @@ public class NetworkPlayer : MonoBehaviour {
 		NetworkManager.OnReceiveMessageFromGameObjectUpdate += NetworkManager_OnReceiveMessageFromGameObjectUpdate;
 		NetworkManager.OnDisconnectedClientUpdate += NetworkManager_OnDisconnectedClientUpdate;
 		//Initialize
-		lastPosition = transform.position;
-		lastRotation = transform.rotation;
+		if (LOCAL) 
+		{
+			lastPosition = transform.localPosition;
+			lastRotation = transform.localRotation;
+		} 
+		else 
+		{
+			lastPosition = transform.position;
+			lastRotation = transform.rotation;
+		}
 	}
 
 	void NetworkManager_OnDisconnectedClientUpdate (NetworkManager.DisconnectedClientToDestroyPlayerGameObject newMessage)
@@ -37,9 +46,17 @@ public class NetworkPlayer : MonoBehaviour {
 		//Debug.Log("This is executed from the main thread"); //DEBUG
 		//transform.position = new Vector3(newMessage.GameObjectPos.x, newMessage.GameObjectPos.y, newMessage.GameObjectPos.z);
 		lastPosition = nextPosition;
-		transform.position = nextPosition;
 		lastRotation = nextRotation;
-		transform.rotation = nextRotation;
+		if (LOCAL) 
+		{
+			transform.localPosition = nextPosition;
+			transform.localRotation = nextRotation;
+		}
+		else
+		{
+			transform.position = nextPosition;
+			transform.rotation = nextRotation;
+		}
 		yield return null;
 	}
 
